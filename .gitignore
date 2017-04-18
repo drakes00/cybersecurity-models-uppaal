@@ -12,6 +12,7 @@
 *.vrb
 *~
 *.dvi
+*.synctex.gz
 main.bbl
 main.blg
 *.swp

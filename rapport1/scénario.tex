@@ -1,0 +1,276 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage[underline=true,rounded corners=false]{pgf-umlsd}
+
+
+\title{Scénarios d'attaques}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+\section{Configuration 1:}
+Un seul serveur MODBUS ou OPC-UA (configuré en mode None) contrôle l’ensemble du procédé. Il communique avec un client MODBUS ou OPC-UA qui contrôle l’arrêt et le démarrage du procédé et lit l’état des capteurs, du tapis roulant et de la valve.
+\medskip
+\subsection{Résultat :}
+
+Dans cette configuration toutes les attaques sont possibles:
+\medskip
+
+\textit{Attaque 1 :} Forcer l’ouverture de la valve quel que soit l’état des capteurs. Si une
+bouteille était présente, le liquide finira par déborder, sinon il coulera hors de la bouteille.
+\medskip
+%%%%%%%%%%%%% Scénario 1%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textbf{Scénario 1 :}
+\medskip
+\medskip
+
+\begin{sequencediagram}
+  \tikzstyle{inststyle}+=[{font=\large}]
+  \def\unitfactor{.9}
+
+  \newinst{instance 1}
+  {Client}
+
+  \newinst[4cm]{instance 2}
+  {Attaquant}
+
+  \newinst[4cm]{instance 3}
+  {Serveur}
+
+  \tikzstyle{instcolordienst}=[fill=black!25]
+  \tikzstyle{instcolorbuerger}=[fill=black!25]
+
+  \messcall{instance 1}{écrire(run:=true)}{instance 3}
+  \messcall{instance 3}{OK}{instance 1}
+  \messcall{instance 1}{lire(motor)}{instance 2}
+  \begin{callself}
+      {instance 2}{Modifier(lire(motor))}{renvoi écrire(nozzle:=true)}
+    \end{callself}
+  \messcall{instance 2}{écrire(nozzle:=true)}{instance 3}
+  
+\end{sequencediagram}
+\newpage 
+
+%%%%%%%%%%%%% Scénario 2%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textbf{Scénario 2 :}
+\medskip
+\medskip
+
+\begin{sequencediagram}
+  \tikzstyle{inststyle}+=[{font=\large}]
+  \def\unitfactor{.9}
+
+  \newinst{instance 1}
+  {Client}
+
+  \newinst[4cm]{instance 3}
+  {Serveur}
+  
+  \newinst[4cm]{instance 2}
+  {Attaquant}
+
+
+  \tikzstyle{instcolordienst}=[fill=black!25]
+  \tikzstyle{instcolorbuerger}=[fill=black!25]
+
+  \messcall{instance 1}{écrire(run:=true)}{instance 3}
+  \messcall{instance 3}{OK}{instance 1}
+  \begin{callself}
+      {instance 2}{Créer()}{renvoi nozzle:=true}
+    \end{callself}
+  \messcall{instance 2}{écrire(nozzle:=true)}{instance 3}
+  
+\end{sequencediagram}
+
+\textit{Attaque 2 :} Forcer le tapis roulant à avancer quel que soit l’état des capteurs. Les
+bouteilles avanceront vides.
+\medskip
+
+%%%%%%%%%%%%% Scénario 1%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textbf{Scénario 1 :}
+\medskip
+\medskip
+
+\begin{sequencediagram}
+  \tikzstyle{inststyle}+=[{font=\large}]
+  \def\unitfactor{.9}
+
+  \newinst{instance 1}
+  {Client}
+
+  \newinst[4cm]{instance 2}
+  {Attaquant}
+
+  \newinst[4cm]{instance 3}
+  {Serveur}
+
+  \tikzstyle{instcolordienst}=[fill=black!25]
+  \tikzstyle{instcolorbuerger}=[fill=black!25]
+
+  \messcall{instance 1}{écrire(run:=true)}{instance 3}
+  \messcall{instance 3}{OK}{instance 1}
+  \messcall{instance 1}{lire(motor)}{instance 2}
+  \begin{callself}
+      {instance 2}{Modifier(lire(motor))}{renvoi écrire(motor:=true)}
+    \end{callself}
+  \messcall{instance 2}{écrire(motor:=true)}{instance 3}
+  
+\end{sequencediagram}
+\newpage 
+
+%%%%%%%%%%%%% Scénario 2%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textbf{Scénario 2 :}
+\medskip
+\medskip
+
+\begin{sequencediagram}
+  \tikzstyle{inststyle}+=[{font=\large}]
+  \def\unitfactor{.9}
+
+  \newinst{instance 1}
+  {Client}
+
+  \newinst[4cm]{instance 3}
+  {Serveur}
+  
+  \newinst[4cm]{instance 2}
+  {Attaquant}
+
+
+  \tikzstyle{instcolordienst}=[fill=black!25]
+  \tikzstyle{instcolorbuerger}=[fill=black!25]
+
+  \messcall{instance 1}{écrire(run:=true)}{instance 3}
+  \messcall{instance 3}{OK}{instance 1}
+  \begin{callself}
+      {instance 2}{Créer()}{renvoi motor:=true}
+    \end{callself}
+  \messcall{instance 2}{écrire(motor:=true)}{instance 3}
+  
+\end{sequencediagram}
+\textit{Attaque 3 :} Forcer l’ouverture de la valve et le tapis roulant à avancer quel que soit l’état des capteurs. Cette attaque est un mélange des attaques 1 et 2.
+\medskip
+
+\textbf{Scénarios:} les mêmes scénarios de l'attaque 1 et 2.
+
+\section{Configuration 2 :}
+\paragraph{}
+Un seul serveur OPC-UA (configuré en mode Sign ou SignEncrypt) contrôle l’ensemble du procédé et communique avec un client OPC-UA qui contrôle l’arrêt et le démarrage du procédé et lit l’état des capteurs, du tapis roulant et de la valve.
+\subsection{Résultat :}
+je n'ai pas trouvé des attaques.
+\section{Configuration 3 :}
+\paragraph{}
+Le tapis roulant et son capteur sont contrôlés par un serveur MODBUS ou OPC-UA (configuré en mode None) et la valve et sont capteur par un serveur OPC-UA (configuré en mode Sign ou SignEncrypt). Un unique client multi-protocoles communique avec les deux serveurs.
+\subsection{Résultat :}
+Dans cette configuration toutes les attaques sont possibles:
+\medskip
+
+\textit{Attaque 1 :} Forcer l’ouverture de la valve quel que soit l’état des capteurs. Si une
+bouteille était présente, le liquide finira par déborder, sinon il coulera hors de la bouteille.
+\medskip
+\begin{sequencediagram}
+  \tikzstyle{inststyle}+=[{font=\large}]
+  \def\unitfactor{.9}
+
+  \newinst{instance 1}
+  {Client}
+
+  \newinst[2cm]{instance 2}
+  {Attaquant}
+
+  \newinst[2cm]{instance 3}
+  {OPC-UA}
+  
+  \newinst[2cm]{instance 4}
+  {MODBUS}
+
+  \tikzstyle{instcolordienst}=[fill=black!25]
+  \tikzstyle{instcolorbuerger}=[fill=black!25]
+
+  \messcall{instance 1}{écrire(run:=1)}{instance 3}
+  \messcall{instance 3}{OK}{instance 1}
+  \messcall{instance 1}{lire(motor)}{instance 2}
+  \begin{callself}
+      {instance 2}{Modifier(lire(motor))}{renvoi écrire(bottle:=true)}
+    \end{callself}
+  \messcall{instance 2}{écrire(bottle:=true)}{instance 4}
+\end{sequencediagram}
+\medskip
+
+\textit{Attaque 2 :} Forcer le tapis roulant à avancer quel que soit l’état des capteurs. Les
+bouteilles avanceront vides.
+\medskip
+
+\begin{sequencediagram}
+  \tikzstyle{inststyle}+=[{font=\large}]
+  \def\unitfactor{.9}
+
+  \newinst{instance 1}
+  {Client}
+
+  \newinst[2cm]{instance 2}
+  {Attaquant}
+
+  \newinst[2cm]{instance 3}
+  {OPC-UA}
+  
+  \newinst[2cm]{instance 4}
+  {MODBUS}
+
+  \tikzstyle{instcolordienst}=[fill=black!25]
+  \tikzstyle{instcolorbuerger}=[fill=black!25]
+
+  \messcall{instance 1}{écrire(run:=1)}{instance 3}
+  \messcall{instance 3}{OK}{instance 1}
+  \messcall{instance 1}{lire(motor)}{instance 2}
+  \begin{callself}
+      {instance 2}{Modifier(lire(motor))}{renvoi écrire(motor:=true)}
+    \end{callself}
+  \messcall{instance 2}{écrire(motor:=true)}{instance 4}
+\end{sequencediagram}
+\medskip
+\newpage
+\textit{Attaque 3 :} Forcer l’ouverture de la valve et le tapis roulant à avancer quel que soit l’état des capteurs. Cette attaque est un mélange des attaques 1 et 2.
+\medskip
+
+\begin{sequencediagram}
+  \tikzstyle{inststyle}+=[{font=\large}]
+  \def\unitfactor{.9}
+
+  \newinst{instance 1}
+  {Client}
+
+  \newinst[2cm]{instance 2}
+  {Attaquant}
+
+  \newinst[2cm]{instance 3}
+  {OPC-UA}
+  
+  \newinst[2cm]{instance 4}
+  {MODBUS}
+
+  \tikzstyle{instcolordienst}=[fill=black!25]
+  \tikzstyle{instcolorbuerger}=[fill=black!25]
+
+  \messcall{instance 1}{écrire(run:=1)}{instance 3}
+  \messcall{instance 3}{OK}{instance 1}
+  \messcall{instance 1}{lire(motor)}{instance 2}
+  \begin{callself}
+      {instance 2}{Modifier(lire(motor))}{renvoi écrire(motor:=true)}
+    \end{callself}
+  \messcall{instance 2}{écrire(motor:=true)}{instance 4}
+\end{sequencediagram}
+\end{document}
