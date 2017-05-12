@@ -1,41 +1,286 @@
-\documentclass[11pt,a4paper,twoside,openright]{scrreprt}
+\documentclass[10pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage{ae}
-\usepackage{aecompl}
+\usepackage[francais]{babel}
 \usepackage[T1]{fontenc}
-\setcounter{tocdepth}{3}
-\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{color}
 \author{Abdelaziz KHALED}
 \title{Les modèles d'attaquants}
 \renewcommand{\thesection}{\arabic{section}}
 
+\newcommand{\rouge}[1]{{\color{red}#1}}
+\newcommand{\VERT}[1]{{\color{green}#1}}
+\newcommand{\bleu}[1]{\textcolor{black}{$#1$}}
+\newcommand{\bl}[1]{\textcolor{black}{#1}}
+\newcommand{\Ra}{\ensuremath{\Rightarrow}}
+\newcommand{\ra}{\ensuremath{\rightarrow}}
+\newcommand{\RaE}{\VERT{\Ra E}}
+\newcommand{\RaI}{\VERT{\Ra I}}
+\newcommand{\et}{\mathop{\&}}
+ \newcommand{\infer}[2]{
+ \begin{array}{c}
+   #1\\
+   \hline \noalign{\vskip 1pt}#2
+  \end{array}}
+\newcommand{\inferThreeLabel}[5]{\bl{
+\begin{array}{cc}
+ {\VERT{#1}} \quad 
+ \begin{array}{c}
+   #2 \hspace{2em} #3\hspace{2em} #4\\
+   \hline \noalign{\vskip 1pt}#5
+  \end{array}
+\end{array}}}
+
+\newcommand{\inferTwoLabel}[4]{\bl{
+\begin{array}{cc}
+ {\VERT{#1}} \quad 
+ \begin{array}{c}
+   #2 \hspace{2em} #3\\
+   \hline \noalign{\vskip 1pt}#4
+  \end{array}
+\end{array}}}
+
+\newcommand{\leafLabel}[2]{\bl{
+ {\VERT{#1}} \quad
+  \begin{array}{c}
+  #2
+  \end{array} }}
+
+\newcommand{\inferLabel}[3]{\bl{
+    \begin{array}{cc}
+    {\VERT{#1}} \quad
+    \begin{array}{c}
+      #2\\
+      \hline \noalign{\vskip 1pt}#3
+    \end{array}
+  \end{array}
+  }}
+
+    
+\newcommand{\heading}[1]{%      % ca c'est des commandes a moi
+  \begin{center}                % mais ca peut t'interesser
+    \large\bf
+    \color{cyan}{\shadowbox{#1}}%
+  \end{center}
+  \markright{#1}
+  \vspace{1ex minus 1ex}}
+
+\newcommand{\subheading}[1]{%
+  \begin{center}
+    \color{green}{\bf\Ovalbox{#1}}
+  \end{center}}
+
 \begin{document}
 \let\cleardoublepage\clearpage
 \maketitle
+\newpage
 \tableofcontents
 \newpage
-
 \section{Introduction}
+Depuis l’attaque d’un site de production d’uranium en 2010 (le Vers Stuxnet), le nombre
+de cyber attaques de systèmes de contrôle de production industrielle n’a cessé d’augmenter.\newline
+ 
+D'une part, l'évolution des technologies amène les systèmes de pilotage informatisé des installations à s'ouvrir aux réseaux extérieurs, ce qui génère une augmentation des risques.\newline
 
+D’autre part, les composants techniques utilisés dans les systèmes de contrôle industriel sont en général peu préparés aux défis de la sécurité informatique.
+\newline
+
+Notre objective est de crée un framework qui permet de générer automatique les scénarios d'attaques contre les systèmes industriels à partir des différentes configurations et différents modèles d'attaquant. Dans la première étape on spécifie un modèle du système(agents, canaux et protocoles de communication, messages, etc.) ainsi que les propriétés de sécurité attendues et les différents modèles d'attaquant spécifiques envisagés. La deuxième étapes on utilise le modèle checking UPPAAL pour produire les scénarios d'attaques.\newline
+  
+Nous présentons dans ce rapport les différents modèles d'attaquants et leurs modélisations avec le model checking UPPAAL.  
 \section{Modèles d'attaquants}
+L'attaquant est l'entité principale dans la vérification des protocoles cryptographiques et la génération des scénarios d'attaques. Dans~\cite{ref1}, les auteurs ont classé les attaquants en plusieurs classes. Dans notre travail on a regroupé les attaquants en deux classes : \textit{les attaquants externes} et \textit{les attaquants internes}. L'attaquant externe est celui qui peut écouter de façon passive le réseau, forger, modifier ou rejouer les messages entre les agents. L'attaquant interne dispose de plus de capacités. Il peut jouer le rôle d'un ou plusieurs agent(s) légitime(s).\newline
+
+Dans cette partie on va présenter la formalisation de différents modèles d'attaquants avec les clauses de Horn.   
+% parler sur les défférents classe des attaquants qui existe et ce quoi les classes qui on va utilisé 
 \subsection{Clauses de Horn}
 \paragraph{}
-Modélisation et limites
+Une $clause\; de\; Horn$ est une disjonction de littéraux, c'est-à-dire une clause comportant au plus un littéral positif.  
+\[(A_{1}\wedge...\wedge A_{n})\Rightarrow B ,\;\;\;\; avec\;\; n \in N  \]
+$A_{i}$ et $B$ sont des atomes de la forme $P(t_{1},...,t_{k})$,où $P$ est un prédicat k-aires et $t_{i}$ sont des termes. $B$ est appelé la t\^{e}te de clause et $A_{1}\wedge...\wedge A_{n}$ le corps de la clause. Une clause unité (ou fait) est clause de Horn dont le corps est vide, c'est-à-dire comportent un littéral positif et aucun littéral négatif.\newline
 
-\subsection{Le Modèle Dolev-Yoa}
-Les caractéristiques de modèle Dolev-Yao\\
-Les extensions de modèle Dolev-Yao	
-	
+Un but est une clause de Horn dont la t\^{e}te est vide, c'est-à-dire ne contenant aucun littéral positif. 		    \newline
+
+L'idée principale de formalisation avec les clauses de Horn~\cite{ref2} est l’utilisation des
+termes pour représenter les messages et les prédicats pour indiquer qu'un terme est connu de l'attaquant, exemple: \textit{attaquant(m)} indique que l'attaquant peut avoir le terme $m$   (message). Dans la \textit{section 2.3} on explique comment formaliser les attaquants avec les clauses de Horn.
+
+\subsection{Le Modèle Dolev-Yao}
+Le modèle de l'attaquant le plus courant est celui de Dolev-Yao~\cite{ref3}. Il a un contr\^{o}le complet sur le réseau et il peut dériver de nouveaux messages à partir de ses connaissances initiales et les messages reçus de la part des agents légitimes. Pour obtenir un nouveau message, l'attaquant peut composer et décomposer, chiffrer et déchiffrer des messages, dans le cas o\`{u} il connaît la clé.\newline
+
+Notons que la connaissance initiale d’un attaquant se limite aux clés publiques de tous les agents, à sa clé privée. Ci-dessous, les règles de déduction de l'attaquant Dolev-Yao :\newline
+\begin{center}
+\begin{tabular}{|l|c|}
+  \hline
+  $\inferLabel{}{ u \in I}{I\vdash u}$ & Capacité à reconnaitre un terme \\
+  \hline
+  $\inferLabel{}{ I \vdash \langle u,v \rangle}{I\vdash u}$ & Capacité à décomposer un message  \\
+  \hline
+  $\inferLabel{}{ I \vdash \langle u,v \rangle}{I\vdash v}$ & Capacité à décomposer un message \\
+  \hline
+  $\inferLabel{}{ I \vdash u \hspace{5pt} I \vdash v }{I \vdash \langle u,v \rangle}$ & Capacité  à  composer  un  terme  à  partir  de  deux termes \\
+  \hline
+  $\inferLabel{}{ I \vdash u \hspace{5pt} I \vdash v }{I \vdash {\lbrace u \rbrace}_{v}}$ & Capacité  à  chiffrer  un  message  avec  une  clé connue \\
+  \hline
+  $\inferLabel{}{ I \vdash {\lbrace u \rbrace}_{v} \hspace{5pt} I \vdash v }{I \vdash u}$ & Capacité  à  déchiffrer  un  message  avec  une  clé connue \\
+  \hline
+\end{tabular}
+\end{center}
+\medskip
+
+\paragraph{}
+La notation $I \vdash u$ signifie que l’attaquant à partir de ses connaissances courantes $I$,
+est capable de déduire $u$ grâce à son système de déduction.
+  
 \subsection{Formalisation de différents modèles d'attaquants}
+Les primitives cryptographiques sont représentées par des prédicats. Pour le chiffrement et le déchiffrement on utilise les prédicats $crypter(m, pk)$ et $decrypter(m, sk)$. La fonction de hachage est présenté par $h(m)$ et la signature par $signer(h(m), sk)$. Ci-dessous, la représentation des prédicats :\newpage
+  
+\begin{equation}
+attaquant(m)\wedge attaquant(pk)\Longrightarrow attaquant(crypter(m,pk))
+\end{equation}
+\begin{equation}
+attaquant({\lbrace m \rbrace}_{pk}) \wedge attaquant(sk)\Longrightarrow attaquant(decrypter({\lbrace m \rbrace}_{pk},sk)) 
+\end{equation}
+\begin{equation}
+attaquant(m)\wedge attaquant(sk)\Longrightarrow attaquant(signer(h(m),sk))
+\end{equation}
+$(1)$ représente comment chiffrer un message, il faut avoir le $m$ (message) et la clé publique $pk$, $(2)$ représente comment déchiffrer un message, $(3)$ la signature d'un message.\newline
+
+Pour l'envoi et la réception des messages on utilise le prédicat $canal(c,m)$, signifié que le message $m$ est envoyé sur le canal $c$.  
+\begin{equation}
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(m)
+\end{equation}
+\begin{equation}
+attaquant(m)\wedge attaquant(c)\Longrightarrow canal(c,m) 
+\end{equation}
+$(4)$ l'attaquant peut recevoir le message, $(5)$ l'attaquant peut envoyer le message.\newline
+
+Le prédicat $forger(s,m)$ permet de forger un message à partir de la base de connaissance de l'attaquant.
+\begin{equation}
+...
+\end{equation}
+
+Le prédicat $modifier(s,m,m')$ permet de modifier un le message $m$ à partir de la base de connaissance de l'attaquant.\newline
+\begin{equation}
+...
+\end{equation}
+
+Le prédicat $copier(s,m)$ permet de copier un message dans la base de connaissance de l'attaquant. Le prédicat $selectionne(s,m)$ permet de sélectionné un message à partir de la base de connaissance de l'attaquant. Le prédicat $bloquer(m)$ permet de bloquer un message.
+
+
+\subsubsection{Attaquant 1 :}
+Cet attaquant est basé sur le madèle Dolev-Yao, peut :
+\begin{itemize}
+\item intercépter les messages.
+\item crypter, décrypter ou signer les messages.
+\item bloquer les messages.
+\item copier les messages.
+\item modifier, forger ou rejouer les messages.\\
+\end{itemize}
+Formalisation de l'attaquant :   
+\[
+\begin{array}{l}
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(m)\\
+attaquant(m)\wedge attaquant(c)\Longrightarrow canal(c,m)\\
+attaquant(m)\wedge attaquant(pk)\Longrightarrow attaquant(crypter(m,pk))\\
+attaquant({\lbrace m \rbrace}_{pk}) \wedge attaquant(sk)\Longrightarrow attaquant(decrypter({\lbrace m \rbrace}_{pk},sk))\\ 
+attaquant(m)\wedge attaquant(sk)\Longrightarrow attaquant(signer(h(m),sk))\\
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(copier(s,m))\\
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(bloquer(m))\\
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(modifier(s,m,m'))\\
+attaquant(forger(s,m))\wedge attaquant(c)\Longrightarrow canal(c,m)\\
+attaquant(selectionne(s,m))\wedge attaquant(c)\Longrightarrow canal(c,m)\\  
+  
+  \end{array}
+\]
+\subsubsection{Attaquant 2 :}
+Le rôle principal de cet attaquant est modifié les messages. Il peut :
+\begin{itemize}
+\item intercépter les messages.
+\item crypter, décrypter ou signer les messages.
+\item Modifier les messages complet ou juste un champ.\\
+\end{itemize}
+Formalisation de l'attaquant :   
+\[
+\begin{array}{l}
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(m)\\
+attaquant(m)\wedge attaquant(c)\Longrightarrow canal(c,m)\\
+attaquant(m)\wedge attaquant(pk)\Longrightarrow attaquant(crypter(m,pk))\\
+attaquant({\lbrace m \rbrace}_{pk}) \wedge attaquant(sk)\Longrightarrow attaquant(decrypter({\lbrace m \rbrace}_{pk},sk))\\ 
+attaquant(m)\wedge attaquant(sk)\Longrightarrow attaquant(signer(h(m),sk))\\
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(modifier(s,m,m'))\\
+  
+  \end{array}
+\]
+
+\subsubsection{Attaquant 3 :}
+Le rôle principal de cet attaquant est forger les messages. Il peut :
+\begin{itemize}
+\item crypter , décrypter ou signer les messages.
+\item forger les messages.\\
+\end{itemize}
+Formalisation de l'attaquant :   
+\[
+\begin{array}{l}
+attaquant(m)\wedge attaquant(pk)\Longrightarrow attaquant(crypter(m,pk))\\
+attaquant({\lbrace m \rbrace}_{pk}) \wedge attaquant(sk)\Longrightarrow attaquant(decrypter({\lbrace m \rbrace}_{pk},sk))\\ 
+attaquant(m)\wedge attaquant(sk)\Longrightarrow attaquant(signer(h(m),sk))\\
+attaquant(forger(s,m))\wedge attaquant(c)\Longrightarrow canal(c,m)\\
+ 
+  \end{array}
+\]
+
+\subsubsection{Attaquant 4 :}
+Le rôle principal de cet attaquant est rejoué les messages. Il peut :
+\begin{itemize}
+\item intercépter les messages.
+\item copier les messages.
+\item rejouer les messages.\\
+\end{itemize}
+Formalisation de l'attaquant :   
+\[
+\begin{array}{l}
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(m)\\
+attaquant(m)\wedge attaquant(c)\Longrightarrow canal(c,m)\\
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(copier(s,m))\\
+attaquant(selectionne(s,m))\wedge attaquant(c)\Longrightarrow canal(c,m)\\  
+  
+  \end{array}
+\]
+
+\subsubsection{Attaquant 5 :}
+Le rôle principal de cet attaquant est bloqué ou retardé les messages. Il peut :
+\begin{itemize}
+\item intercépter les messages.
+\item bloquer les messages.
+\item retarder les messages.\\
+\end{itemize}
+Formalisation de l'attaquant :   
+\[
+\begin{array}{l}
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(bloquer(m))\\
+canal(c,m)\wedge attaquant(c)\Longrightarrow attaquant(copier(s,m))\\
+attaquant(selectionne(s,m))\wedge attaquant(c)\Longrightarrow canal(c,m)\\
+\end{array}
+\]
+
 \section{Modèles d'attaquants avec UPPAAL}
+UPPAAl~\cite{ref4} est une boite à outils a été développé conjointement par l'université d'Aalborg et l'université d'Uppsala. Il permet de vérifier des réseaux d'automates temporisés. Les propriétés qui peuvent \^{e}tre vérifiées sont principalement des propriétés d'accessibilité, de sûreté, de vivacité ou d'états bloquants. La logique utilisée par UPPAAL est un fragment de TCTL qui n'autorise pas les embo\^{i}tements d'opérateurs temporels. L'algoritheme implémenté dans UPPAAL est un algoritheme d'analyse en avant.   
 \subsection{Le modèle UPPAAL}
-un aperçu sur UPPAAL
+
+
+
 \subsection{La modélisation de différents modèles d'attaquants}
-Lien entre les clauses de Horn et les automates(Transformation)\\
-Explication la modélisation de chaque attaquant.
-\section{Comparaison entre CSP,Pi-calcul et clauses de Horn}
-les limites de clauses de Horn par rapport à CSP et Pi-calcul
+%Lien entre les clauses de Horn et les automates(Transformation)\\
+%Explication la modélisation de chaque attaquant.
+
+
+%\section{Comparaison entre CSP,Pi-calcul et clauses de Horn}
+%les limites de clauses de Horn par rapport à CSP et Pi-calcul
 \section{Conclusion}
+\newpage
 \bibliography{mabiblio}
 \bibliographystyle{plain}
+
 \end{document}
