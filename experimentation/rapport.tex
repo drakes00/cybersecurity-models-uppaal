@@ -1,0 +1,86 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{tikz}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\author{}
+\date{}
+\title{Les résultats de l’expérimentation}
+\begin{document}
+\maketitle
+Ce tableau représente les résultats de l’expérimentation avec le temps maximal pour trouver l’attaque :\newline
+
+%\begin{table}[]
+\small
+\begin{tabular}{ll|c|c|c|c|c|}
+\cline{3-7}
+&  &  Attaquant 1 &  Attaquant 2 &  Attaquant 3 & Attaquant 4 & Temps  \\ \hline
+\multicolumn{1}{|l|}{\multirow{3}{*}{Conf1}} & Attaque1 &  \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark}  & 0.99 S  \\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque2 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & 1.21 S  \\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque3 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & 0.13 S  \\ \hline
+\multicolumn{1}{|l|}{\multirow{3}{*}{Conf3}} & Attaque1 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} &  11.99 S\\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque2 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & 19.14 S  \\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque3 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & 18.34  S \\ \hline
+\end{tabular}
+%\end{table}
+\medskip
+
+Dans la deuxième expérimentation j’ai changé les capacités de l’attaquant 3. Il peut forger les messages seulement pour contrôler la valve ou le capture.\newline 
+
+%\begin{table}[]
+\small
+\begin{tabular}{ll|c|c|c|c|c|}
+\cline{3-7}
+&  &  Attaquant 1 &  Attaquant 2 &  Attaquant 3 & Attaquant 4 & Temps  \\ \hline
+\multicolumn{1}{|l|}{\multirow{3}{*}{Conf1}} & Attaque1 &  \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark}  & 0.99 S  \\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque2 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & 1.21 S  \\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque3 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & 0.13 S  \\ \hline
+\multicolumn{1}{|l|}{\multirow{3}{*}{Conf3}} & Attaque1 & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & \color{red}{\xmark} &  11.99 S\\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque2 & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & \color{red}{\xmark} & 19.14 S  \\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque3 & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & \color{red}{\xmark} & 18.34  S \\ \hline
+\end{tabular}
+%\end{table}
+\medskip
+
+Dans la troisième expérimentation j’ai modifié le client et l’attaquant 2. Pour le client il peut lire seulement l’état des capteurs et pour l’attaquant peut modifier les champs : fonction(lire, écrire) et valeur(vrai et faux).\newline 
+
+%\begin{table}[]
+\small
+\begin{tabular}{ll|c|c|c|c|c|}
+\cline{3-7}
+&  &  Attaquant 1 &  Attaquant 2 &  Attaquant 3 & Attaquant 4 & Temps  \\ \hline
+\multicolumn{1}{|l|}{\multirow{3}{*}{Conf1}} & Attaque1 &  \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark}  & 0.99 S  \\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque2 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & 1.21 S  \\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque3 & \color{green}{\cmark} & \color{red}{\xmark} & \color{green}{\cmark} & \color{red}{\xmark} & 0.13 S  \\ \hline
+\multicolumn{1}{|l|}{\multirow{3}{*}{Conf3}} & Attaque1 & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & \color{red}{\xmark} &  11.99 S\\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque2 & \color{green}{\cmark} & \color{red}{\xmark} & \color{red}{\xmark} & \color{red}{\xmark} & 19.14 S  \\ \cline{2-7} 
+\multicolumn{1}{|l|}{}& Attaque3 & \color{green}{\cmark} & \color{red}{\xmark} & \color{red}{\xmark} & \color{red}{\xmark} & 18.34  S \\ \hline
+\end{tabular}
+%\end{table}
+\medskip
+
+\textbf{La spécification des propriétés :}
+\begin{equation}
+AG\; not(nozzle==true\; and\; bottle==false)
+\end{equation}
+\begin{equation}
+AG\; not(motor==true\; and\; bottle==true\; and\; level==false)
+\end{equation}
+\begin{equation}
+AG\; not(nozzle==true \; and\; motor==true)
+\end{equation}
+\medskip
+
+pour trouver la première attaque dans la configuration 3 j'ai utilisé cette requête : 
+\[AG\; not(nozzle==true\; and\; action==true)\]
+La variable $action$ prend la valeur true si le serveur change l'état de capture $bottle$ ou l'état de moteur.
+
+\end{document}
