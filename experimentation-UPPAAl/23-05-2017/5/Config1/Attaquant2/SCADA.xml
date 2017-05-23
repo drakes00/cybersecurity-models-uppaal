@@ -1,0 +1,978 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>//Variables
+
+bool finish,check,action,action1;
+int public_key,private_key;
+//Channels
+
+chan msg,c2s,s2c,read,sign,signAndCrypt,decrypt,checkSign;
+chan open,close,start,stop;
+broadcast chan on,off,chan1,chan2;
+
+// message
+
+struct{
+    int  variable;
+    int  function;
+    int  value;
+    int  s_variable;
+    int  s_function;
+    int  s_value;
+} tram;
+
+//System variable
+
+bool run:=0;    // 1
+bool motor:=0;  // 2
+bool bottle:=0; // 3
+bool nozzle:=0; // 4
+bool level:=0;  // 5
+
+//**************************************************************************************************************
+//                                                                                                             *   
+//                                    Functions for encrypt and decrypt messages                               *    
+//                                                                                                             *   
+//**************************************************************************************************************
+
+// Hash function
+int Hash(int msg){
+
+ return msg*5;
+
+}
+//Encryption function
+int Encrypt(int p,int m){
+
+   return (m+(2*p));
+
+}
+//Decryption function
+int Decrypt(int s,int m){
+
+ return (m-s);
+
+}
+// Sign function
+int Sign(int m,int s){
+
+    int d;
+    d:=Hash(m);
+    return (d+s);
+
+}
+// CHeck sign function
+bool CheckSign(int sign,int m, int p){
+
+   int res_hash,hash;
+   hash := Decrypt(2*p,sign);
+   res_hash := Hash(m);
+   
+   if(hash==res_hash) return true;
+   else return false;
+
+}
+</declaration>
+	<template>
+		<name>Client</name>
+		<declaration>//System variable
+bool processStatus:=0;
+bool motorStatus:=0;
+bool bottleInPosition:=0;
+bool nozzleStatus:=0;
+bool levelHit:=0;
+
+// Update les variable
+void Update(){
+
+if(tram.variable==2){
+
+    motorStatus:=tram.value;
+
+}
+
+if(tram.variable==3){
+    
+    bottleInPosition:=tram.value;
+
+}
+if(tram.variable==4){
+    
+    nozzleStatus:=tram.value;
+
+}
+if(tram.variable==5){
+
+    levelHit:=tram.value;
+
+}
+}
+
+</declaration>
+		<location id="id0" x="-408" y="-238">
+		</location>
+		<location id="id1" x="-136" y="-170">
+		</location>
+		<location id="id2" x="0" y="-170">
+		</location>
+		<location id="id3" x="0" y="-238">
+		</location>
+		<location id="id4" x="-272" y="-238">
+		</location>
+		<location id="id5" x="-510" y="-238">
+		</location>
+		<location id="id6" x="-646" y="-238">
+		</location>
+		<init ref="id6"/>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id4"/>
+			<label kind="assignment" x="-221" y="-195">Update()</label>
+			<nail x="-272" y="-170"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="select" x="-161" y="-280">n:int[2,5]</label>
+			<label kind="guard" x="-195" y="-229">finish==true</label>
+			<label kind="assignment" x="-246" y="-263">tram.variable:=n,tram.function:=0</label>
+			<nail x="-127" y="-238"/>
+			<nail x="-42" y="-238"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-595" y="-255">msg!</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-501" y="-161">finish==true</label>
+			<nail x="-272" y="-170"/>
+			<nail x="-646" y="-170"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-357" y="-263">s2c?</label>
+			<label kind="assignment" x="-467" y="-221">processStatus:=tram.value</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-476" y="-263">c2s!</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-76" y="-195">s2c?</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="8" y="-212">c2s!</label>
+		</transition>
+	</template>
+	<template>
+		<name>BehaviorClient</name>
+		<location id="id7" x="136" y="-68">
+			<name x="126" y="-102">On</name>
+		</location>
+		<location id="id8" x="-136" y="-68">
+			<name x="-146" y="-102">Off</name>
+		</location>
+		<init ref="id8"/>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-17" y="-34">msg?</label>
+			<label kind="assignment" x="-136" y="-17">tram.variable:=1,tram.function:=1,tram.value:=0</label>
+			<nail x="0" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-34" y="-170">msg?</label>
+			<label kind="assignment" x="-136" y="-144">tram.variable:=1,tram.function:=1,tram.value:=1</label>
+			<nail x="0" y="-110"/>
+		</transition>
+	</template>
+	<template>
+		<name>Server</name>
+		<declaration>bool checkMsg,write;
+
+void CheckMsg(){
+
+if(tram.function==1){
+    
+    write:=1;
+
+}
+else{
+
+    write:=0;
+
+}
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
+void Update(){
+
+if(tram.variable==2){
+
+    tram.value:=motor;
+
+}
+
+if(tram.variable==3){
+    
+    tram.value:=bottle;
+
+}
+if(tram.variable==4){
+    
+    tram.value:=nozzle;
+
+}
+if(tram.variable==5){
+
+    tram.value:=level;
+
+}
+
+
+}
+</declaration>
+		<location id="id9" x="-272" y="-476">
+			<name x="-282" y="-510">Bottle</name>
+		</location>
+		<location id="id10" x="-442" y="-510">
+			<name x="-493" y="-527">Level</name>
+		</location>
+		<location id="id11" x="-714" y="-306">
+			<name x="-773" y="-323">Nozzle</name>
+		</location>
+		<location id="id12" x="-442" y="-136">
+			<name x="-425" y="-144">Motor</name>
+		</location>
+		<location id="id13" x="-204" y="-306">
+			<name x="-187" y="-314">Run</name>
+		</location>
+		<location id="id14" x="-340" y="-578">
+		</location>
+		<location id="id15" x="-442" y="-306">
+		</location>
+		<location id="id16" x="-578" y="-578">
+		</location>
+		<location id="id17" x="-544" y="-374">
+		</location>
+		<location id="id18" x="-884" y="-374">
+		</location>
+		<location id="id19" x="-1020" y="-374">
+		</location>
+		<init ref="id19"/>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-314" y="-603">s2c!</label>
+			<label kind="assignment" x="-323" y="-620">finish:=true</label>
+			<nail x="-340" y="-646"/>
+			<nail x="-1020" y="-646"/>
+		</transition>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id17"/>
+			<label kind="assignment" x="-782" y="-399">CheckMsg()</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-195" y="-629">s2c!</label>
+			<label kind="assignment" x="-195" y="-612">finish:=true</label>
+			<nail x="-442" y="-544"/>
+			<nail x="-204" y="-544"/>
+			<nail x="-204" y="-646"/>
+			<nail x="-1020" y="-646"/>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-254" y="-493">s2c!</label>
+			<label kind="assignment" x="-212" y="-493">finish:=true</label>
+			<nail x="-102" y="-476"/>
+			<nail x="-102" y="-102"/>
+			<nail x="-1020" y="-102"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-246" y="-425">tram.variable==3 
+and tram.value==1
+and run==1</label>
+			<label kind="synchronisation" x="-297" y="-391">chan1!</label>
+			<label kind="assignment" x="-93" y="-459">action:=true</label>
+			<nail x="-425" y="-323"/>
+			<nail x="-425" y="-323"/>
+			<nail x="-297" y="-391"/>
+			<nail x="-280" y="-450"/>
+			<nail x="-280" y="-450"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-246" y="-476">tram.variable==3 
+and tram.value==0
+and run==1</label>
+			<label kind="synchronisation" x="-365" y="-467">chan2!</label>
+			<nail x="-357" y="-433"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-620" y="-501">tram.variable==5
+and tram.value==0
+and run==1</label>
+			<label kind="synchronisation" x="-535" y="-450">chan1!</label>
+			<nail x="-476" y="-425"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-416" y="-527">tram.variable==5
+and tram.value==1
+and run==1</label>
+			<label kind="synchronisation" x="-416" y="-476">chan2!</label>
+			<label kind="assignment" x="-416" y="-544">action1:=true</label>
+			<nail x="-399" y="-425"/>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-994" y="-306">s2c!</label>
+			<label kind="assignment" x="-994" y="-289">finish:=true</label>
+			<nail x="-1020" y="-306"/>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-544" y="-127">s2c!</label>
+			<label kind="assignment" x="-561" y="-144">finish:=true</label>
+			<nail x="-442" y="-102"/>
+			<nail x="-1020" y="-102"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id11"/>
+			<label kind="guard" x="-756" y="-280">tram.variable==4
+and tram.value==0
+and run==1</label>
+			<label kind="synchronisation" x="-612" y="-272">close!</label>
+			<nail x="-595" y="-272"/>
+			<nail x="-697" y="-306"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id11"/>
+			<label kind="guard" x="-782" y="-374">tram.variable==4
+and tram.value==1
+and run==1</label>
+			<label kind="synchronisation" x="-620" y="-357">open!</label>
+			<nail x="-595" y="-340"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-620" y="-246">tram.variable==2 
+and tram.value==0
+and run==1</label>
+			<label kind="synchronisation" x="-518" y="-212">stop!</label>
+			<nail x="-484" y="-238"/>
+			<nail x="-450" y="-153"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-399" y="-246">tram.variable==2 
+and tram.value==1
+and run==1</label>
+			<label kind="synchronisation" x="-399" y="-195">start!</label>
+			<nail x="-408" y="-238"/>
+			<nail x="-433" y="-153"/>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-1011" y="-136">s2c!</label>
+			<label kind="assignment" x="-1011" y="-153">finish:=true</label>
+			<nail x="-204" y="-102"/>
+			<nail x="-1020" y="-102"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-297" y="-280">tram.variable==1 
+and tram.value==0</label>
+			<label kind="synchronisation" x="-348" y="-272">off!</label>
+			<nail x="-340" y="-272"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-280" y="-365">tram.variable==1 
+and tram.value==1</label>
+			<label kind="synchronisation" x="-348" y="-365">on!</label>
+			<nail x="-340" y="-340"/>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id16"/>
+			<label kind="guard" x="-731" y="-569">write==0</label>
+			<nail x="-544" y="-442"/>
+			<nail x="-646" y="-442"/>
+			<nail x="-646" y="-578"/>
+		</transition>
+		<transition>
+			<source ref="id16"/>
+			<target ref="id14"/>
+			<label kind="assignment" x="-512" y="-600">Update()</label>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id15"/>
+			<label kind="guard" x="-527" y="-382">write==1</label>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="-970" y="-399">c2s?</label>
+			<label kind="assignment" x="-994" y="-365">finish:=false</label>
+		</transition>
+	</template>
+	<template>
+		<name>Run</name>
+		<declaration>bool pause:=0;
+
+</declaration>
+		<location id="id20" x="102" y="-68">
+			<name x="85" y="-110">Run</name>
+		</location>
+		<location id="id21" x="-204" y="34">
+			<committed/>
+		</location>
+		<location id="id22" x="-68" y="34">
+			<committed/>
+		</location>
+		<location id="id23" x="-102" y="-68">
+			<committed/>
+		</location>
+		<location id="id24" x="-306" y="-68">
+			<name x="-357" y="-76">Stop</name>
+		</location>
+		<init ref="id24"/>
+		<transition>
+			<source ref="id20"/>
+			<target ref="id22"/>
+			<label kind="synchronisation" x="8" y="8">off?</label>
+			<label kind="assignment" x="-8" y="42">run:=0</label>
+			<nail x="102" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="-25" y="-102">start!</label>
+			<nail x="-68" y="-68"/>
+			<nail x="-17" y="-68"/>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id23"/>
+			<label kind="synchronisation" x="-178" y="-110">on?</label>
+			<label kind="assignment" x="-187" y="-93">run:=1</label>
+			<nail x="-272" y="-68"/>
+			<nail x="-170" y="-68"/>
+			<nail x="-136" y="-68"/>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id24"/>
+			<label kind="synchronisation" x="-289" y="8">chan2!</label>
+			<nail x="-306" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id21"/>
+			<label kind="synchronisation" x="-153" y="8">stop!</label>
+		</transition>
+	</template>
+	<template>
+		<name>Motor</name>
+		<location id="id25" x="238" y="0">
+			<name x="263" y="-8">Move</name>
+		</location>
+		<location id="id26" x="0" y="0">
+			<name x="-51" y="-8">Stop</name>
+		</location>
+		<init ref="id26"/>
+		<transition>
+			<source ref="id26"/>
+			<target ref="id25"/>
+			<label kind="guard" x="68" y="-51">run==1</label>
+			<label kind="synchronisation" x="136" y="-51">chan2?</label>
+			<label kind="assignment" x="93" y="-25">motor:=1</label>
+			<nail x="136" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id26"/>
+			<label kind="synchronisation" x="110" y="93">stop?</label>
+			<label kind="assignment" x="93" y="76">motor:=0</label>
+			<nail x="238" y="68"/>
+			<nail x="0" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id26"/>
+			<target ref="id25"/>
+			<label kind="synchronisation" x="102" y="-102">start?</label>
+			<label kind="assignment" x="85" y="-85">motor:=1</label>
+			<nail x="0" y="-68"/>
+			<nail x="238" y="-68"/>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id26"/>
+			<label kind="synchronisation" x="110" y="42">chan1?</label>
+			<label kind="assignment" x="93" y="0">motor:=0</label>
+			<nail x="136" y="34"/>
+		</transition>
+	</template>
+	<template>
+		<name>Bottle</name>
+		<location id="id27" x="238" y="0">
+			<name x="255" y="-8">In</name>
+		</location>
+		<location id="id28" x="0" y="0">
+			<name x="-42" y="-8">Out</name>
+		</location>
+		<init ref="id28"/>
+		<transition>
+			<source ref="id28"/>
+			<target ref="id27"/>
+			<label kind="synchronisation" x="102" y="-144">chan1?</label>
+			<label kind="assignment" x="93" y="-127">bottle:=1</label>
+			<nail x="0" y="-102"/>
+			<nail x="238" y="-102"/>
+		</transition>
+		<transition>
+			<source ref="id27"/>
+			<target ref="id28"/>
+			<label kind="synchronisation" x="102" y="34">chan2?</label>
+			<label kind="assignment" x="102" y="8">bottle:=0</label>
+			<nail x="229" y="0"/>
+			<nail x="136" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id28"/>
+			<target ref="id27"/>
+			<label kind="guard" x="102" y="-59">motor==1</label>
+			<label kind="synchronisation" x="110" y="-76">chan1!</label>
+			<label kind="assignment" x="102" y="-25">bottle:=1</label>
+			<nail x="136" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>Nozzle</name>
+		<location id="id29" x="238" y="0">
+			<name x="255" y="-8">Open</name>
+		</location>
+		<location id="id30" x="0" y="0">
+			<name x="-59" y="-8">Close</name>
+		</location>
+		<init ref="id30"/>
+		<transition>
+			<source ref="id29"/>
+			<target ref="id30"/>
+			<label kind="synchronisation" x="93" y="85">close?</label>
+			<label kind="assignment" x="76" y="68">nozzle:=0</label>
+			<nail x="238" y="68"/>
+			<nail x="0" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id30"/>
+			<target ref="id29"/>
+			<label kind="synchronisation" x="85" y="-102">open?</label>
+			<label kind="assignment" x="76" y="-85">nozzle:=1</label>
+			<nail x="0" y="-68"/>
+			<nail x="238" y="-68"/>
+		</transition>
+		<transition>
+			<source ref="id29"/>
+			<target ref="id30"/>
+			<label kind="synchronisation" x="110" y="42">chan2?</label>
+			<label kind="assignment" x="93" y="8">nozzle:=0</label>
+			<nail x="136" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id30"/>
+			<target ref="id29"/>
+			<label kind="synchronisation" x="110" y="-51">chan1?</label>
+			<label kind="assignment" x="93" y="-25">nozzle:=1</label>
+			<nail x="136" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>Level</name>
+		<location id="id31" x="238" y="0">
+			<name x="255" y="-8">Filling</name>
+		</location>
+		<location id="id32" x="0" y="0">
+			<name x="-42" y="-8">Full</name>
+		</location>
+		<init ref="id32"/>
+		<transition>
+			<source ref="id31"/>
+			<target ref="id32"/>
+			<label kind="synchronisation" x="102" y="93">chan2?</label>
+			<label kind="assignment" x="102" y="76">level:=1</label>
+			<nail x="238" y="68"/>
+			<nail x="0" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id31"/>
+			<target ref="id32"/>
+			<label kind="synchronisation" x="102" y="42">chan2!</label>
+			<label kind="assignment" x="102" y="8">level:=1</label>
+			<nail x="136" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id32"/>
+			<target ref="id31"/>
+			<label kind="synchronisation" x="93" y="-51">chan1?</label>
+			<label kind="assignment" x="102" y="-17">level:=0</label>
+			<nail x="136" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>Intruder</name>
+		<declaration>int pk:=4;
+int sk:=8;
+
+int a:=0;
+int b:=0;
+int c:=0;
+int d:=0;
+int f:=0;
+
+
+// message
+struct{
+    int  variable;
+    int  function;
+    int  value;
+    int  s_variable;
+    int  s_function;
+    int  s_value;  
+} intruderTram;
+
+// message
+struct{
+    int  variable;
+    int  function;
+    int  value;
+    int  s_variable;
+    int  s_function;
+    int  s_value;  
+} data;
+
+bool create,playback,copy;
+
+//Function generation secure messages
+void GenerateMsg(int variable,int function,int value){
+
+    intruderTram.variable:= variable;
+    intruderTram.function:= function;
+    intruderTram.value:= value;
+   
+}</declaration>
+		<location id="id33" x="-76" y="-340">
+			<name x="-86" y="-374">I3</name>
+		</location>
+		<location id="id34" x="-339" y="-340">
+			<name x="-349" y="-374">I2</name>
+		</location>
+		<location id="id35" x="-68" y="204">
+			<name x="-42" y="195">I8</name>
+		</location>
+		<location id="id36" x="-340" y="204">
+			<name x="-350" y="170">I7</name>
+		</location>
+		<location id="id37" x="-68" y="-204">
+			<name x="-78" y="-238">I5</name>
+		</location>
+		<location id="id38" x="-348" y="-204">
+			<name x="-358" y="-238">I4</name>
+		</location>
+		<location id="id39" x="-68" y="34">
+			<name x="-59" y="8">I6</name>
+		</location>
+		<location id="id40" x="-407" y="34">
+			<name x="-424" y="51">I1</name>
+		</location>
+		<location id="id41" x="-714" y="34">
+			<name x="-748" y="26">I0</name>
+		</location>
+		<init ref="id41"/>
+		<transition>
+			<source ref="id39"/>
+			<target ref="id40"/>
+			<nail x="0" y="34"/>
+			<nail x="0" y="272"/>
+			<nail x="-408" y="272"/>
+			<nail x="-408" y="51"/>
+		</transition>
+		<transition>
+			<source ref="id40"/>
+			<target ref="id39"/>
+			<label kind="select" x="-272" y="42">value:int[0,1]</label>
+			<label kind="assignment" x="-289" y="59">tram.value:=value</label>
+			<nail x="-204" y="102"/>
+		</transition>
+		<transition>
+			<source ref="id40"/>
+			<target ref="id39"/>
+			<label kind="select" x="-280" y="-8">variable:int[1,5]</label>
+			<label kind="assignment" x="-306" y="8">tram.variable:=variable</label>
+			<nail x="-204" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id40"/>
+			<target ref="id41"/>
+			<label kind="synchronisation" x="-569" y="76">c2s!</label>
+			<nail x="-544" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id40"/>
+			<label kind="synchronisation" x="-561" y="-25">c2s?</label>
+			<nail x="-544" y="0"/>
+		</transition>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id40"/>
+			<nail x="-42" y="-340"/>
+			<nail x="-42" y="-102"/>
+			<nail x="-348" y="-102"/>
+			<nail x="-399" y="17"/>
+		</transition>
+		<transition>
+			<source ref="id34"/>
+			<target ref="id33"/>
+			<label kind="assignment" x="-271" y="-365">public_key:=3</label>
+		</transition>
+		<transition>
+			<source ref="id34"/>
+			<target ref="id33"/>
+			<label kind="assignment" x="-254" y="-297">public_key:=4</label>
+			<nail x="-212" y="-306"/>
+		</transition>
+		<transition>
+			<source ref="id34"/>
+			<target ref="id33"/>
+			<label kind="assignment" x="-263" y="-399">public_key:=2</label>
+			<nail x="-212" y="-374"/>
+		</transition>
+		<transition>
+			<source ref="id40"/>
+			<target ref="id34"/>
+			<nail x="-407" y="17"/>
+			<nail x="-408" y="-340"/>
+		</transition>
+		<transition>
+			<source ref="id35"/>
+			<target ref="id40"/>
+			<nail x="-68" y="136"/>
+			<nail x="-340" y="136"/>
+		</transition>
+		<transition>
+			<source ref="id36"/>
+			<target ref="id35"/>
+			<label kind="synchronisation" x="-255" y="187">signAndCrypt!</label>
+		</transition>
+		<transition>
+			<source ref="id36"/>
+			<target ref="id35"/>
+			<label kind="synchronisation" x="-229" y="246">decrypt!</label>
+			<nail x="-204" y="238"/>
+		</transition>
+		<transition>
+			<source ref="id36"/>
+			<target ref="id35"/>
+			<label kind="synchronisation" x="-221" y="153">sign!</label>
+			<nail x="-323" y="204"/>
+			<nail x="-323" y="204"/>
+			<nail x="-204" y="170"/>
+		</transition>
+		<transition>
+			<source ref="id40"/>
+			<target ref="id36"/>
+		</transition>
+		<transition>
+			<source ref="id37"/>
+			<target ref="id40"/>
+			<nail x="-68" y="-136"/>
+			<nail x="-340" y="-136"/>
+		</transition>
+		<transition>
+			<source ref="id38"/>
+			<target ref="id37"/>
+			<label kind="assignment" x="-263" y="-229">private_key:=8</label>
+			<nail x="-204" y="-204"/>
+		</transition>
+		<transition>
+			<source ref="id40"/>
+			<target ref="id38"/>
+		</transition>
+	</template>
+	<template>
+		<name>Security</name>
+		<declaration>void SignMsg(){
+ 
+ tram.s_variable := Sign(tram.variable,private_key);
+ tram.s_function := Sign(tram.function,private_key);
+ tram.s_value    := Sign(tram.value,private_key);
+ //
+ public_key:=0;
+ private_key:=0;
+
+}
+
+void SignAndCryptMsg(){
+
+ tram.variable   := Encrypt(public_key,tram.variable);
+ tram.function   := Encrypt(public_key,tram.function);
+ tram.value      := Encrypt(public_key,tram.value);
+ tram.s_variable := Encrypt(public_key,Sign(tram.variable,private_key));
+ tram.s_function := Encrypt(public_key,Sign(tram.function,private_key));
+ tram.s_value    := Encrypt(public_key,Sign(tram.value,private_key));
+ //
+ public_key:=0;
+ private_key:=0;
+}
+
+void DecryptMsg(){
+
+ tram.variable   := Decrypt(private_key,tram.variable);
+ tram.function   := Decrypt(private_key,tram.function);
+ tram.value      := Decrypt(private_key,tram.value);
+ tram.s_variable := Decrypt(private_key,tram.s_variable);
+ tram.s_function := Decrypt(private_key,tram.s_function);
+ tram.s_value    := Decrypt(private_key,tram.s_value);
+ //
+ public_key:=0;
+ private_key:=0;
+}
+
+void CheckSignMsg(){
+ 
+if(CheckSign(tram.s_variable,tram.variable,public_key) and CheckSign(tram.s_function,tram.function,public_key) 
+   and CheckSign(tram.s_value,tram.value,public_key)){check:=true;}
+else {check:=false;}
+ //
+ public_key:=0;
+ private_key:=0;
+}
+
+//
+</declaration>
+		<location id="id42" x="0" y="102">
+			<name x="-34" y="119">CheckSign</name>
+			<committed/>
+		</location>
+		<location id="id43" x="0" y="-238">
+			<name x="-25" y="-272">Decrypt</name>
+			<committed/>
+		</location>
+		<location id="id44" x="-204" y="-68">
+			<name x="-323" y="-76">SignAndCrypt</name>
+			<committed/>
+		</location>
+		<location id="id45" x="204" y="-68">
+			<name x="221" y="-76">Sign</name>
+			<committed/>
+		</location>
+		<location id="id46" x="0" y="-68">
+		</location>
+		<init ref="id46"/>
+		<transition>
+			<source ref="id42"/>
+			<target ref="id46"/>
+			<label kind="assignment" x="-153" y="25">CheckSignMsg()</label>
+			<nail x="-34" y="25"/>
+		</transition>
+		<transition>
+			<source ref="id46"/>
+			<target ref="id42"/>
+			<label kind="synchronisation" x="42" y="25">checkSign?</label>
+			<nail x="34" y="25"/>
+		</transition>
+		<transition>
+			<source ref="id43"/>
+			<target ref="id46"/>
+			<label kind="assignment" x="-136" y="-178">DecryptMsg()</label>
+			<nail x="-34" y="-161"/>
+		</transition>
+		<transition>
+			<source ref="id46"/>
+			<target ref="id43"/>
+			<label kind="synchronisation" x="42" y="-178">decrypt?</label>
+			<nail x="34" y="-161"/>
+			<nail x="9" y="-212"/>
+		</transition>
+		<transition>
+			<source ref="id44"/>
+			<target ref="id46"/>
+			<label kind="assignment" x="-170" y="-25">SignAndCryptMsg()</label>
+			<nail x="-102" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id46"/>
+			<target ref="id44"/>
+			<label kind="synchronisation" x="-153" y="-127">signAndCrypt?</label>
+			<nail x="-102" y="-102"/>
+		</transition>
+		<transition>
+			<source ref="id45"/>
+			<target ref="id46"/>
+			<label kind="assignment" x="68" y="-25">SignMsg()</label>
+			<nail x="102" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id46"/>
+			<target ref="id45"/>
+			<label kind="synchronisation" x="85" y="-127">sign?</label>
+			<nail x="102" y="-102"/>
+		</transition>
+	</template>
+	<system>// List one or more processes to be composed into a system.
+system Client,BehaviorClient,Run,Motor,Bottle,Nozzle,Level,Server&lt;Intruder;
+    </system>
+	<queries>
+		<query>
+			<formula>A[]not(Nozzle.Open  and Motor.Move)
+			</formula>
+			<comment>Attaque3
+			</comment>
+		</query>
+		<query>
+			<formula>A[]not(Motor.Move and Bottle.In and Level.Filling)
+			</formula>
+			<comment>attaque 2
+			</comment>
+		</query>
+		<query>
+			<formula>A[]not(Nozzle.Open and Bottle.Out)
+			</formula>
+			<comment>Attaque 1
+			</comment>
+		</query>
+	</queries>
+</nta>
