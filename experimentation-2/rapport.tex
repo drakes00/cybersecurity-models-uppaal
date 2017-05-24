@@ -1,0 +1,69 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{tikz}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\author{}
+\date{}
+\title{Les résultats de l’expérimentation}
+\begin{document}
+\maketitle
+\medskip
+\textbf{Modifications :}
+\begin{itemize}
+\item Attaquant 2 peut modifier les champs : variable,valeur.
+\item Attaquant 3 peut forger les messages seulement pour contrôler le moteur.\newline 
+\end{itemize}
+
+\textbf{Propriétés à vérifier :}
+\begin{enumerate}
+\item La valve ne s'ouvre que lorsqu'une bouteille est en position.
+\item Le moteur ne se démarre que lorsque la bouteille est pleine.
+\item La valve ne s'ouvre que lorsque le moteur s'arr\^{e}te.
+\item La valve ne s'ouvre pas lorsque le serveur force le changement de l'état du capteur de position.
+\end{enumerate}
+\medskip
+
+\textbf{La spécification des propriétés :}
+\begin{equation}
+AG\; not(nozzle==true\; and\; bottle==false)
+\end{equation}
+\begin{equation}
+AG\; not(motor==true\; and\; bottle==true\; and\; level==false)
+\end{equation}
+\begin{equation}
+AG\; not(nozzle==true \; and\; motor==true)
+\end{equation}
+\begin{equation}
+AG\; not(nozzle==true \; and\; action==true)
+\end{equation}
+
+\medskip
+%\begin{table}[]
+\small
+\begin{tabular}{ll|c|c|c|c|}
+\cline{3-6}
+&  &  Attaquant 1 &  Attaquant 2 &  Attaquant 3 & Attaquant 4 \\ \hline
+\multicolumn{1}{|l|}{\multirow{4}{*}{Conf 1}} & Propriété 1 &  \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & \color{red}{\xmark}    \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}& Propriété 2 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark}   \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}& Propriété 3 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark}   \\\cline{2-6}
+\multicolumn{1}{|l|}{}& Propriété 4 & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & \color{red}{\xmark}   \\ \hline
+
+\multicolumn{1}{|l|}{\multirow{4}{*}{Conf 3}} & Propriété 1 & \color{red}{\xmark} & \color{red}{\xmark} & \color{red}{\xmark} & \color{red}{\xmark} \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}& Propriété 2 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}& Propriété 3 & \color{green}{\cmark} & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} \\ \cline{2-6}
+\multicolumn{1}{|l|}{}& Propriété 4 & \color{green}{\cmark} & \color{green}{\cmark} & \color{red}{\xmark} & \color{red}{\xmark} \\ \hline
+\end{tabular}
+%\end{table}
+\paragraph{}
+Dans la configuration 3 la propriété 1 n'a pas violé parceque le serveur OPC-UA qui contr\^{o}le la valve et l'attaquant n'a pas accès à la valve.  
+
+\end{document}
