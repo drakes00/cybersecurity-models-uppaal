@@ -1,0 +1,18 @@
+//////////////////////////////////////////////////////////////////////////////////
+//										//						
+//			Modèle générale						//
+//										//
+//////////////////////////////////////////////////////////////////////////////////
+
+
+- Topologie 1 : Client et serveur MODBUS.
+- Topologie 2 : Client , serveur MODBUS et serveur OPC-UA.
+
+chaque dossier contient 4 sous dossiers, et chaque sous dossier représente un modèle d'attaquant, et dans chaque sous dossier on trouve le modèle au format XML.
+
+- Dossier Attaquant 1 => Modèle Dolev-Yao.
+- Dossier Attaquant 2 => Modèle qui modifier les messages.
+- Dossier Attaquant 3 => Modèle qui forger les messages.
+- Dossier Attaquant 3 => Modèle qui rejouer les messages.
+
+  
